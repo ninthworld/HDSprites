@@ -1,6 +1,6 @@
 # HDSprites - Stardew Valley Mod (SMAPI / Harmony)
 
-![Comparison Image](HDSprites_Comparison.png)
+![Comparison Image](media/HDSprites_Banner.png)
 
 Stardew Valley mod that doubles the resolution of most textures using a 2xBR upscale algorithm.
 
