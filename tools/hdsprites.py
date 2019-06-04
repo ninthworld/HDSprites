@@ -185,7 +185,6 @@ ALL_RES = [
 	"LooseSprites/ControllerMaps",
 	"LooseSprites/cowPhotos",
 	"LooseSprites/cowPhotosWinter",
-	"LooseSprites/daybg",
 	"LooseSprites/emojis",
 	"LooseSprites/Fence1",
 	"LooseSprites/Fence2",
@@ -194,14 +193,12 @@ ALL_RES = [
 	"LooseSprites/font_bold",
 	"LooseSprites/font_colored",
 	"LooseSprites/Giftbox",
-	"LooseSprites/hoverBox",
 	"LooseSprites/JojaCDForm",
 	"LooseSprites/JunimoNote",
 	"LooseSprites/LanguageButtons",
 	"LooseSprites/letterBG",
 	"LooseSprites/logo",
 	"LooseSprites/map",
-	"LooseSprites/nightbg",
 	"LooseSprites/shadow",
 	"LooseSprites/skillTitles",
 	"LooseSprites/stardewPanorama",
@@ -345,6 +342,7 @@ ALL_RES = [
 	"TileSheets/Projectiles",
 	"TileSheets/rain",
 	"TileSheets/SecretNotesImages",
+	"TileSheets/tools",
 	"TileSheets/weapons"
 ] 
 

@@ -31,7 +31,12 @@ namespace HDSprites
 
         public string assetPath;
         public List<string> assetFiles;
-        public Dictionary<String, Texture2D> assets;
+        public static Dictionary<String, Texture2D> assets;
+
+        public static string toolsTextureName = "TileSheets/tools";
+        public static int toolsTextureWidth = 336;
+        public static int toolsTextureHeight = 384;
+        public static Color toolsTextureColor = new Color(13, 37, 42);
 
         public override void Entry(IModHelper help)
         {
@@ -94,6 +99,10 @@ namespace HDSprites
         {
             Color[] data = new Color[(int)(tex.Width / scale) * (int)(tex.Height / scale)];
             for (int i = 0; i < data.Length; ++i) data[i] = Color.White;
+
+            // Fixes tools texture
+            if (name.Equals(HDSpritesMod.toolsTextureName)) data[0] = HDSpritesMod.toolsTextureColor;
+
             SetData(data);
 
             Scale = scale;
@@ -123,9 +132,21 @@ namespace HDSprites
 
             static bool skip = false;
 
+            static Color[] toolsData = new Color[HDSpritesMod.toolsTextureWidth * HDSpritesMod.toolsTextureHeight];
+
             internal static bool Prefix(ref SpriteBatch __instance, ref Texture2D texture, ref Vector4 destination, ref bool scaleDestination, ref Rectangle? sourceRectangle, ref Color color, ref float rotation, ref Vector2 origin, ref SpriteEffects effects, ref float depth)
             {
                 if (skip || !sourceRectangle.HasValue) return true;
+
+                // Fixes tools texture
+                if (texture.Width == HDSpritesMod.toolsTextureWidth && texture.Height == HDSpritesMod.toolsTextureHeight) {
+                    try
+                    {
+                        texture.GetData<Color>(toolsData);
+                        if (toolsData[0] == HDSpritesMod.toolsTextureColor) texture = HDSpritesMod.assets.GetValueSafe(HDSpritesMod.toolsTextureName);
+                    }
+                    catch (Exception e) { }
+                }
 
                 if (texture is ScaledTexture2D s && sourceRectangle != null && sourceRectangle.Value is Rectangle r)
                 {
@@ -133,6 +154,7 @@ namespace HDSprites
                     var newSR = new Rectangle?(new Rectangle((int)(r.X * s.Scale), (int)(r.Y * s.Scale), (int)(r.Width * s.Scale), (int)(r.Height * s.Scale)));
                     var newOrigin = new Vector2(origin.X * s.Scale, origin.Y * s.Scale);
 
+                    // Fixes scaling issues
                     if (s.AssetName.Equals("TileSheets/Craftables") 
                         || s.AssetName.Equals("Maps/MenuTiles") 
                         || s.AssetName.Equals("LooseSprites/LanguageButtons")
