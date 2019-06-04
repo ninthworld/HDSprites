@@ -2,6 +2,8 @@
 
 ![Comparison Image](media/HDSprites_Banner.png)
 
+Nexus Mods - [https://www.nexusmods.com/stardewvalley/mods/4024](https://www.nexusmods.com/stardewvalley/mods/4024)
+
 Stardew Valley mod that doubles the resolution of most textures using a 2xBR upscale algorithm.
 
 All files in the mod's assets folder are loaded and will replace their identically named counterpart in the game's base Content folder. The mod assumes that all loaded images are exactly twice the resolution of the original version.
