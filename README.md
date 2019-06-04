@@ -1,6 +1,8 @@
 # HDSprites - Stardew Valley Mod (SMAPI)
 Stardew Valley mod that doubles the resolution of most textures (SMAPI + Harmony) 
 
+![Comparison Image](HDSprites_Comparison.png)
+
 All files in the mod's assets folder are loaded and will replace their identically named counterpart in the game's base Content folder. The mod assumes that all loaded images are exactly twice the resolution of the original version.
 
 ## Requirements
