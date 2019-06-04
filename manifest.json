@@ -2,9 +2,8 @@
   "Name": "HDSprites",
   "Author": "NinthWorld",
   "Version": "1.0.0",
-  "Description": "Replaces all loaded game assets with their scaled (x2) counterparts in the mod's assets folder.",
+  "Description": "Doubles the resolution of most textures using a 2xBR upscale algorithm.",
   "UniqueID": "NinthWorld.HDSprites",
   "EntryDll": "HDSprites.dll",
-  "MinimumApiVersion": "2.10.0",
-  "UpdateKeys": []
+  "MinimumApiVersion": "2.10.0"
 }
