@@ -46,8 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssetTexture.cs" />
+    <Compile Include="DrawFix.cs" />
+    <Compile Include="ModConfig.cs" />
     <Compile Include="HDSpritesMod.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />
@@ -55,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\Pathoschild.Stardew.ModBuildConfig.2.2.0\analyzers\dotnet\cs\StardewModdingAPI.ModBuildConfig.Analyzer.dll" />
