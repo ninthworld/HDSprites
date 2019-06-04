@@ -21,7 +21,7 @@ namespace HDSprites
             AssetName = assetName;
             Scale = scale;
             STexture = newTexture;
-            UniqueID = assetName.GetHashCode();
+            UniqueID = assetName.GetHashCode() & 0xffffff;
             Color[] data = new Color[originalTexture.Width * originalTexture.Height];
             originalTexture.GetData(data);
             if (shouldEncode) data[0] = encode(UniqueID);
@@ -37,15 +37,15 @@ namespace HDSprites
         private static Color encode(int uniqueId)
         {
             return new Color(
-                (uniqueId >> 24) & 0xff,
                 (uniqueId >> 16) & 0xff,
                 (uniqueId >> 8) & 0xff,
+                (uniqueId >> 0) & 0xff,
                 0);
         }
 
         private static int decode(Color color)
         {
-            return ((color.R << 24) | (color.G << 16) | (color.B << 8));
+            return ((color.R << 16) | (color.G << 8) | (color.B << 0));
         }
     }
 }
