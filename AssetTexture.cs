@@ -62,9 +62,31 @@ namespace HDSprites
                 {
                     int toIndex = (y + toArea.Y) * HDTexture.Width + (x + toArea.X);
                     Color subColor = subData[(y + fromArea.Y) * texture.Width + (x + fromArea.X)];
-                    if (!overlay || subColor.A > 0)
+                    if (!overlay || subColor.A == 255)
                     {
                         hdData[toIndex] = subColor;
+                    }
+                    else
+                    {
+                        Color hdColor = hdData[toIndex];
+
+                        float srcR = subColor.R / 255.0f;
+                        float srcG = subColor.G / 255.0f;
+                        float srcB = subColor.B / 255.0f;
+                        float srcA = subColor.A / 255.0f;
+
+                        float dstR = hdColor.R / 255.0f;
+                        float dstG = hdColor.G / 255.0f;
+                        float dstB = hdColor.B / 255.0f;
+                        float dstA = hdColor.A / 255.0f;
+
+                        float outA = srcA + dstA * (1.0f - srcA);
+                        float outR = (srcR * srcA + dstR * dstA * (1.0f - srcA)) / outA;
+                        float outG = (srcG * srcA + dstG * dstA * (1.0f - srcA)) / outA;
+                        float outB = (srcB * srcA + dstB * dstA * (1.0f - srcA)) / outA;
+
+                        Color outColor = new Color((byte)(outR * 255.0f), (byte)(outG * 255.0f), (byte)(outB * 255.0f), (byte)(outA * 255.0f));
+                        hdData[toIndex] = outColor;
                     }
                 }
             }
