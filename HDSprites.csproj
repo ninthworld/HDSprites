@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssetTexture.cs" />
+    <Compile Include="ContentPack\ContentPackConfig.cs" />
     <Compile Include="DrawFix.cs" />
     <Compile Include="ModConfig.cs" />
     <Compile Include="HDSpritesMod.cs" />

@@ -11,36 +11,79 @@ namespace HDSprites
     {
         public string AssetName { get; set; }
         public float Scale { get; set; }
-        public virtual Texture2D STexture { get; set; }
+        public virtual Texture2D HDTexture { get; set; }
 
         private int UniqueID { get; set; }
-
-        public AssetTexture(string assetName, Texture2D originalTexture, Texture2D newTexture, float scale = 1, bool shouldEncode = false)
+        
+        public AssetTexture(string assetName, Texture2D originalTexture, Texture2D hdTexture, float scale = 1, bool shouldEncode = false)
             : base(originalTexture.GraphicsDevice, originalTexture.Width, originalTexture.Height)
         {
-            AssetName = assetName;
-            Scale = scale;
-            STexture = newTexture;
-            UniqueID = assetName.GetHashCode() & 0xffffff;
+            this.AssetName = assetName;
+            this.Scale = scale;
+            this.HDTexture = hdTexture;
+            this.UniqueID = 0;
+
             Color[] data = new Color[originalTexture.Width * originalTexture.Height];
             originalTexture.GetData(data);
-            if (shouldEncode) data[0] = encode(UniqueID);
+            if (shouldEncode)
+            {
+                this.UniqueID = assetName.GetHashCode() & 0xffffff;
+                data[0] = encode(this.UniqueID);
+            }
             SetData(data);
+        }
+
+        public void setOriginalTexture(Texture2D texture)
+        {
+            Color[] data = new Color[texture.Width * texture.Height];
+            texture.GetData(data);
+            if (this.UniqueID != 0)
+            {
+                data[0] = encode(this.UniqueID);
+            }
+            SetData(data);
+        }
+
+        public void setSubTexture(Texture2D texture, Rectangle fromArea, Rectangle toArea, bool overlay)
+        {
+            if (fromArea.IsEmpty) fromArea = new Rectangle(0, 0, texture.Width, texture.Height);
+            if (toArea.IsEmpty) toArea = new Rectangle(0, 0, HDTexture.Width, HDTexture.Height);
+            if (fromArea.Width != toArea.Width || fromArea.Height != toArea.Height) return;
+
+            Color[] hdData = new Color[HDTexture.Width * HDTexture.Height];
+            HDTexture.GetData(hdData);
+
+            Color[] subData = new Color[texture.Width * texture.Height];
+            texture.GetData(subData);
+
+            for (int x = 0; x < fromArea.Width; ++x)
+            {
+                for (int y = 0; y < fromArea.Height; ++y)
+                {
+                    int toIndex = (y + toArea.Y) * HDTexture.Width + (x + toArea.X);
+                    Color subColor = subData[(y + fromArea.Y) * texture.Width + (x + fromArea.X)];
+                    if (!overlay || subColor.A > 0)
+                    {
+                        hdData[toIndex] = subColor;
+                    }
+                }
+            }
+            if (this.UniqueID != 0)
+            {
+                hdData[0] = encode(this.UniqueID);
+            }
+            HDTexture.SetData(hdData);
         }
 
         public bool checkUniqueID(Color[] data)
         {
             if (data.Length < 1) return false;
-            return decode(data[0]).Equals(UniqueID);
+            return decode(data[0]).Equals(this.UniqueID);
         }
 
         private static Color encode(int uniqueId)
         {
-            return new Color(
-                (uniqueId >> 16) & 0xff,
-                (uniqueId >> 8) & 0xff,
-                (uniqueId >> 0) & 0xff,
-                0);
+            return new Color((uniqueId >> 16) & 0xff, (uniqueId >> 8) & 0xff, (uniqueId >> 0) & 0xff, 0);
         }
 
         private static int decode(Color color)
