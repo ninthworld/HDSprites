@@ -1,20 +1,22 @@
-﻿using Microsoft.Xna.Framework;
+﻿using HDSprites.Token;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
+using System.Collections.Generic;
 
-namespace HDSprites
+namespace HDSprites.ContentPack
 {
     public class ContentPackAsset
     {
         private ContentPackManager Manager { get; set; }
         public IContentPack ContentPack { get; set; }
-        public TokenString Target { get; set; }
-        public TokenString File { get; set; }
-        public MultiTokenDictionary When { get; set; }
+        public StringWithTokens Target { get; set; }
+        public StringWithTokens File { get; set; }
+        public List<TokenEntry> When { get; set; }
         public Rectangle FromArea { get; set; }
         public Rectangle ToArea { get; set; }
         public bool Overlay { get; set; }
 
-        public ContentPackAsset(ContentPackManager manager, IContentPack contentPack, TokenString target, TokenString file, MultiTokenDictionary when, Rectangle fromArea, Rectangle toArea, bool overlay)
+        public ContentPackAsset(ContentPackManager manager, IContentPack contentPack, StringWithTokens target, StringWithTokens file, List<TokenEntry> when, Rectangle fromArea, Rectangle toArea, bool overlay)
         {
             this.Manager = manager;
             this.ContentPack = contentPack;
@@ -25,30 +27,30 @@ namespace HDSprites
             this.FromArea = fromArea;
             this.ToArea = toArea;
 
-            foreach (string token in this.Target.GetTokens())
+            foreach (string token in this.Target.GetTokenNames())
             {
-                this.Manager.GlobalTokenManager.RegisterAsset(token, this);
+                this.Manager.DynamicTokenManager.RegisterAsset(token, this);
             }
 
-            foreach (string token in this.File.GetTokens())
+            foreach (string token in this.File.GetTokenNames())
             {
-                this.Manager.GlobalTokenManager.RegisterAsset(token, this);
+                this.Manager.DynamicTokenManager.RegisterAsset(token, this);
             }
 
-            foreach (string token in this.When.Keys)
+            foreach (var entry in this.When)
             {
-                this.Manager.GlobalTokenManager.RegisterAsset(token, this);
+                this.Manager.DynamicTokenManager.RegisterAsset(entry.Name, this);
             }
         }
 
         public string GetTarget()
         {
-            return this.Target.GetInterpreted(this.Manager.GlobalTokenManager.GlobalTokens).ToString();
+            return this.Target.Parse(this.Manager.DynamicTokenManager.DynamicTokens).ToCleanString();
         }
 
         public string GetFile()
         {
-            return this.File.GetInterpreted(this.Manager.GlobalTokenManager.GlobalTokens).ToString();
+            return this.File.Parse(this.Manager.DynamicTokenManager.DynamicTokens, this.GetTarget()).ToCleanString();
         }
 
         public bool IsPartial()
@@ -58,7 +60,14 @@ namespace HDSprites
 
         public bool IsEnabled()
         {
-            return this.When.ContainsAll(this.Manager.GlobalTokenManager.GlobalTokens);
+            foreach (var entry in this.When)
+            {
+                if (!entry.IsEnabled(this.Manager.DynamicTokenManager))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void Update()

@@ -15,21 +15,19 @@
 /// **********
 
 using Harmony;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewValley;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
-using StardewModdingAPI.Utilities;
-using System.Text.RegularExpressions;
+using HDSprites.ContentPack;
 
 namespace HDSprites
 {
     public class HDSpritesMod : Mod, IAssetEditor
     {
+        public static IModHelper ModHelper;
         public static bool EnableMod = true;
         public static Dictionary<string, AssetTexture> AssetTextures = new Dictionary<string, AssetTexture>();
 
@@ -56,14 +54,17 @@ namespace HDSprites
         public override void Entry(IModHelper help)
         {
             this.Config = this.Helper.ReadConfig<ModConfig>();
+
+            ModHelper = help;
+            EnableMod = this.Config.EnableMod;
+
             this.HDAssetManager = new HDAssetManager(help);
             this.ContentPackManager = new ContentPackManager(this.HDAssetManager);
             
             this.Helper.Events.Input.ButtonPressed += OnButtonPressed;
+            this.Helper.Events.Player.Warped += OnWarped;
             this.Helper.Events.GameLoop.DayStarted += OnDayStarted;
 
-            EnableMod = this.Config.EnableMod;
-            
             foreach (var asset in this.Config.LoadAssets)
             {
                 if (asset.Value)
@@ -86,7 +87,7 @@ namespace HDSprites
                 {
                     this.Monitor.Log($"Reading content pack: {contentPack.Manifest.Name} {contentPack.Manifest.Version} from {contentPack.DirectoryPath}");
 
-                    this.ContentPackManager.AddContentPack(contentPack);                    
+                    this.ContentPackManager.AddContentPack(contentPack);
                 }
             }
 
@@ -131,7 +132,12 @@ namespace HDSprites
 
         private void OnDayStarted(object s, DayStartedEventArgs e)
         {
-            this.ContentPackManager.GlobalTokenManager.OnDayStarted();
+            this.ContentPackManager.DynamicTokenManager.CheckTokens();
+        }
+
+        private void OnWarped(object s, WarpedEventArgs e)
+        {
+            this.ContentPackManager.DynamicTokenManager.CheckTokens();
         }
     }
 }

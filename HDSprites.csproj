@@ -50,14 +50,21 @@
     <Compile Include="ContentPack\ContentPackAsset.cs" />
     <Compile Include="ContentPack\ContentPackConfig.cs" />
     <Compile Include="ContentPack\ContentPackManager.cs" />
-    <Compile Include="Token\GlobalTokenManager.cs" />
-    <Compile Include="Token\MultiTokenDictionary.cs" />
-    <Compile Include="Token\TokenDictionary.cs" />
-    <Compile Include="Token\TokenString.cs" />
+    <Compile Include="Token\DynamicToken.cs" />
     <Compile Include="DrawFix.cs" />
     <Compile Include="HDAssetManager.cs" />
     <Compile Include="ModConfig.cs" />
     <Compile Include="HDSpritesMod.cs" />
+    <Compile Include="Token\DynamicTokenManager.cs" />
+    <Compile Include="Token\DynamicTokenValue.cs" />
+    <Compile Include="Token\Global\GlobalToken.cs" />
+    <Compile Include="Token\Global\DateWeatherGlobalTokens.cs" />
+    <Compile Include="Token\Global\WorldGlobalTokens.cs" />
+    <Compile Include="Token\Global\RelationshipsGlobalTokens.cs" />
+    <Compile Include="Token\Global\PlayerGlobalTokens.cs" />
+    <Compile Include="Token\StringWithTokens.cs" />
+    <Compile Include="Token\TokenEntry.cs" />
+    <Compile Include="Token\TokenValue.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />

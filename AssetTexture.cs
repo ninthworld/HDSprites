@@ -46,6 +46,7 @@ namespace HDSprites
 
         public void setSubTexture(Texture2D texture, Rectangle fromArea, Rectangle toArea, bool overlay)
         {
+            if (texture == null) return;
             if (fromArea.IsEmpty) fromArea = new Rectangle(0, 0, texture.Width, texture.Height);
             if (toArea.IsEmpty) toArea = new Rectangle(0, 0, HDTexture.Width, HDTexture.Height);
             if (fromArea.Width != toArea.Width || fromArea.Height != toArea.Height) return;
