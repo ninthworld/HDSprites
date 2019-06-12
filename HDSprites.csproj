@@ -50,6 +50,8 @@
     <Compile Include="ContentPack\ContentPackAsset.cs" />
     <Compile Include="ContentPack\ContentPackConfig.cs" />
     <Compile Include="ContentPack\ContentPackManager.cs" />
+    <Compile Include="ContentPack\ContentPackManifest.cs" />
+    <Compile Include="ContentPack\ContentPackObject.cs" />
     <Compile Include="Token\DynamicToken.cs" />
     <Compile Include="DrawFix.cs" />
     <Compile Include="HDAssetManager.cs" />
@@ -65,6 +67,7 @@
     <Compile Include="Token\StringWithTokens.cs" />
     <Compile Include="Token\TokenEntry.cs" />
     <Compile Include="Token\TokenValue.cs" />
+    <Compile Include="Upscaler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />

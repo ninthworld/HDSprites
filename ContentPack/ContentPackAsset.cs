@@ -8,7 +8,7 @@ namespace HDSprites.ContentPack
     public class ContentPackAsset
     {
         private ContentPackManager Manager { get; set; }
-        public IContentPack ContentPack { get; set; }
+        public ContentPackObject ContentPack { get; set; }
         public StringWithTokens Target { get; set; }
         public StringWithTokens File { get; set; }
         public List<TokenEntry> When { get; set; }
@@ -16,7 +16,7 @@ namespace HDSprites.ContentPack
         public Rectangle ToArea { get; set; }
         public bool Overlay { get; set; }
 
-        public ContentPackAsset(ContentPackManager manager, IContentPack contentPack, StringWithTokens target, StringWithTokens file, List<TokenEntry> when, Rectangle fromArea, Rectangle toArea, bool overlay)
+        public ContentPackAsset(ContentPackManager manager, ContentPackObject contentPack, StringWithTokens target, StringWithTokens file, List<TokenEntry> when, Rectangle fromArea, Rectangle toArea, bool overlay)
         {
             this.Manager = manager;
             this.ContentPack = contentPack;

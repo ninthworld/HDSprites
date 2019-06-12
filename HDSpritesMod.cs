@@ -22,11 +22,14 @@ using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
 using HDSprites.ContentPack;
+using System;
+using HDSprites.Token;
 
 namespace HDSprites
 {
     public class HDSpritesMod : Mod, IAssetEditor
     {
+        public static GraphicsDevice GraphicsDevice = null;
         public static IModHelper ModHelper;
         public static bool EnableMod = true;
         public static Dictionary<string, AssetTexture> AssetTextures = new Dictionary<string, AssetTexture>();
@@ -57,7 +60,7 @@ namespace HDSprites
 
             ModHelper = help;
             EnableMod = this.Config.EnableMod;
-
+            
             this.HDAssetManager = new HDAssetManager(help);
             this.ContentPackManager = new ContentPackManager(this.HDAssetManager);
             
@@ -81,12 +84,25 @@ namespace HDSprites
                 }
             }
             
-            if (this.Config.EnableContentPacks)
+            string[] contentPackDirs = Directory.GetDirectories(Path.Combine(help.DirectoryPath, ".."));
+            foreach (string dir in contentPackDirs)
             {
-                foreach (IContentPack contentPack in this.Helper.ContentPacks.GetOwned())
+                string manifestFile = Path.Combine(dir, "manifest.json");
+                ContentPackManifest manifest = this.Helper.ReadJsonFile<ContentPackManifest>(manifestFile);
+                if (manifest != null && this.Config.LoadContentPacks.TryGetValue(manifest.UniqueID, out bool load) && load)
                 {
-                    this.Monitor.Log($"Reading content pack: {contentPack.Manifest.Name} {contentPack.Manifest.Version} from {contentPack.DirectoryPath}");
+                    this.Monitor.Log($"Reading content pack: {manifest.Name} {manifest.Version} from {manifestFile}");
+                    
+                    WhenDictionary configChoices = this.Helper.ReadJsonFile<WhenDictionary>(Path.Combine(dir, "config.json"));
+                    if (configChoices == null) configChoices = new WhenDictionary();
 
+                    ContentConfig contentConfig = this.Helper.ReadJsonFile<ContentConfig>(Path.Combine(dir, "content.json"));
+                    if (contentConfig == null) continue;
+
+                    string contentPath = Path.Combine(help.DirectoryPath, this.Config.ContentPacksPath, manifest.UniqueID);
+                    Directory.CreateDirectory(contentPath);
+                                        
+                    ContentPackObject contentPack = new ContentPackObject(dir, contentPath, manifest, contentConfig, configChoices);
                     this.ContentPackManager.AddContentPack(contentPack);
                 }
             }
@@ -116,6 +132,8 @@ namespace HDSprites
             }
 
             this.ContentPackManager.EditAsset(assetData.AssetName);
+
+            if (GraphicsDevice == null) GraphicsDevice = assetTexture.GraphicsDevice;
 
             assetData.AsImage().ReplaceWith(assetTexture);
         }

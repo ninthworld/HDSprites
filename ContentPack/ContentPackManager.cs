@@ -1,8 +1,10 @@
 ﻿using HDSprites.Token;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace HDSprites.ContentPack
 {
@@ -21,37 +23,32 @@ namespace HDSprites.ContentPack
             this.DynamicTokenManager = new DynamicTokenManager();
         }
 
-        public void AddContentPack(IContentPack contentPack)
+        public void AddContentPack(ContentPackObject contentPack)
         {
-            WhenDictionary configChoices = contentPack.ReadJsonFile<WhenDictionary>("config.json");
-            if (configChoices == null) configChoices = new WhenDictionary();
-
             Dictionary<string, DynamicToken> configTokens = new Dictionary<string, DynamicToken>();
-            foreach (var entry in configChoices)
+            foreach (var entry in contentPack.Config)
             {
                 DynamicToken token = new DynamicToken(entry.Key);
                 token.AddValue(new TokenValue(entry.Value, true));
                 configTokens.Add(entry.Key, token);
             }
-
-            ContentConfig contentConfig = contentPack.ReadJsonFile<ContentConfig>("content.json");
-            if (configChoices.Count < 1)
+            
+            if (contentPack.Config.Count < 1)
             {
-                foreach (var token in contentConfig.ConfigSchema)
+                foreach (var token in contentPack.Content.ConfigSchema)
                 {
                     if (token.Value.Default != null)
                     {
-                        configChoices.Add(token.Key, token.Value.Default);
+                        contentPack.Config.Add(token.Key, token.Value.Default);
                     }
                     else if (token.Value.AllowValues != null)
                     {
-                        configChoices.Add(token.Key, token.Value.AllowValues.Split(',')[0]);                        
+                        contentPack.Config.Add(token.Key, token.Value.AllowValues.Split(',')[0]);                        
                     }
                 }
-                contentPack.WriteJsonFile<WhenDictionary>("config.json", configChoices);
             }
 
-            foreach (var dynamicToken in contentConfig.DynamicTokens)
+            foreach (var dynamicToken in contentPack.Content.DynamicTokens)
             {
                 if (!this.DynamicTokenManager.DynamicTokens.TryGetValue(dynamicToken.Name, out var token)) {
                     token = new DynamicToken(dynamicToken.Name);
@@ -69,7 +66,7 @@ namespace HDSprites.ContentPack
                 bool enabled = true;
                 foreach (var entry in parsedWhen)
                 {
-                    if (configChoices.TryGetValue(entry.Name, out var value))
+                    if (contentPack.Config.TryGetValue(entry.Name, out var value))
                     {
                         if ((entry.IsConditional && entry.Condition.RawString.Equals(value) != value.ToLower().Equals("true"))
                             || !entry.Values.Contains(value))
@@ -87,7 +84,7 @@ namespace HDSprites.ContentPack
                 token.AddValue(new DynamicTokenValue(dynamicToken.Value, enabled, this.DynamicTokenManager, when));
             }
 
-            foreach (var change in contentConfig.Changes)
+            foreach (var change in contentPack.Content.Changes)
             {
                 if (!(change.Action.Equals("Load") || change.Action.Equals("EditImage")) 
                     || change.Enabled.ToLower().Equals("false")) continue;
@@ -103,7 +100,7 @@ namespace HDSprites.ContentPack
                 bool enabled = true;
                 foreach (var entry in parsedWhen)
                 {
-                    if (configChoices.TryGetValue(entry.Name, out var value))
+                    if (contentPack.Config.TryGetValue(entry.Name, out var value))
                     {
                         if ((entry.IsConditional && entry.Condition.Parse(this.DynamicTokenManager.DynamicTokens).Equals(value) != value.ToLower().Equals("true")) 
                             || !entry.Values.Contains(value))
@@ -129,7 +126,10 @@ namespace HDSprites.ContentPack
                     StringWithTokens file = new StringWithTokens(change.FromFile).Parse(configTokens);
                     bool overlay = change.Patchmode.ToLower().Equals("overlay");
 
-                    ContentPackAsset asset = new ContentPackAsset(this, contentPack, target, file, when, change.FromArea, change.ToArea, overlay);
+                    Rectangle fromArea = new Rectangle(change.FromArea.X * 2, change.FromArea.Y * 2, change.FromArea.Width * 2, change.FromArea.Height * 2);
+                    Rectangle toArea = new Rectangle(change.ToArea.X * 2, change.ToArea.Y * 2, change.ToArea.Width * 2, change.ToArea.Height * 2);
+
+                    ContentPackAsset asset = new ContentPackAsset(this, contentPack, target, file, when, fromArea, toArea, overlay);
 
                     this.ContentPackAssets.Add(asset);
                 }
@@ -201,17 +201,34 @@ namespace HDSprites.ContentPack
             }
         }
 
-        public Texture2D LoadTexture(string file, IContentPack contentPack)
+        public Texture2D LoadTexture(string file, ContentPackObject contentPack)
         {
             if (!this.ContentPackTextures.TryGetValue(file, out Texture2D texture))
             {
-                try
+                GraphicsDevice device = HDSpritesMod.GraphicsDevice;
+                if (device == null) return null;
+
+                string modFile = Path.Combine(contentPack.ModPath, file);
+                string contentFile = Path.Combine(contentPack.ContentPath, file);
+                
+                if (File.Exists(contentFile))
                 {
-                    texture = contentPack.LoadAsset<Texture2D>(file);
+                    FileStream inStream = new FileStream(contentFile, FileMode.Open);
+                    texture = Texture2D.FromStream(device, inStream);
                 }
-                catch (Exception e)
+                else
                 {
-                    return null;
+                    if (!File.Exists(modFile)) return null;
+
+                    FileStream inStream = new FileStream(modFile, FileMode.Open);
+                    Texture2D modTexture = Texture2D.FromStream(device, inStream);
+
+                    texture = Upscaler.Upscale(modTexture);
+
+                    Directory.CreateDirectory(contentFile.Substring(0, contentFile.Replace("/", "\\").LastIndexOf("\\")));
+
+                    FileStream outStream = new FileStream(contentFile, FileMode.Create);
+                    texture.SaveAsPng(outStream, texture.Width, texture.Height);
                 }
 
                 this.ContentPackTextures.Add(file, texture);

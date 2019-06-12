@@ -6,21 +6,24 @@ namespace HDSprites
     class ModConfig
     {
         public bool EnableMod { get; set; }
-        public bool EnableContentPacks { get; set; }
         public SButton ToggleEnableButton { get; set; }
         public int AssetScale { get; set; }
         public string AssetsPath { get; set; }
+        public string ContentPacksPath { get; set; }
 
+        public Dictionary<string, bool> LoadContentPacks { get; set; }
         public Dictionary<string, bool> LoadSections { get; set; }
         public Dictionary<string, bool> LoadAssets { get; set; }
 
         public ModConfig()
         {
             this.EnableMod = true;
-            this.EnableContentPacks = true;
             this.ToggleEnableButton = SButton.F10;
             this.AssetScale = 2;
             this.AssetsPath = "assets";
+            this.ContentPacksPath = "contentPacks";
+
+            this.LoadContentPacks = new Dictionary<string, bool>();
 
             this.LoadSections = new Dictionary<string, bool>()
             {
