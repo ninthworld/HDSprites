@@ -167,7 +167,7 @@ namespace HDSprites.ContentPack
                     }
                     else
                     {
-                        assetTexture.setSubTexture(texture, asset.FromArea, asset.ToArea, asset.Overlay);
+                        assetTexture.SetSubTexture(texture, asset.FromArea, asset.ToArea, asset.Overlay);
                     }
                 }
 
@@ -183,7 +183,7 @@ namespace HDSprites.ContentPack
                             Texture2D partialTexture = this.LoadTexture(contentPack.GetFile(), contentPack.ContentPack);
                             if (partialTexture != null)
                             {
-                                assetTexture.setSubTexture(partialTexture, contentPack.FromArea, contentPack.ToArea, contentPack.Overlay);
+                                assetTexture.SetSubTexture(partialTexture, contentPack.FromArea, contentPack.ToArea, contentPack.Overlay);
                             }
                         }
                     }

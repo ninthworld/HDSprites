@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using HDSprites.ContentPack;
 using System;
 using HDSprites.Token;
+using Microsoft.Xna.Framework;
 
 namespace HDSprites
 {
@@ -80,15 +81,46 @@ namespace HDSprites
             {
                 string manifestFile = Path.Combine(dir, "manifest.json");
                 if (Directory.GetParent(manifestFile).Name.StartsWith(".")) continue;
-                ContentPackManifest manifest = this.Helper.ReadJsonFile<ContentPackManifest>(manifestFile);
+
+                ContentPackManifest manifest = null;
+                try
+                {
+                    manifest = this.Helper.ReadJsonFile<ContentPackManifest>(manifestFile);
+                }
+                catch (Exception e)
+                {
+                    continue;
+                }
+
                 if (manifest != null && this.Config.LoadContentPacks.TryGetValue(manifest.UniqueID, out bool load) && load)
                 {
-                    this.Monitor.Log($"Reading content pack: {manifest.Name} {manifest.Version} from {manifestFile}");
-
-                    WhenDictionary configChoices = this.Helper.ReadJsonFile<WhenDictionary>(Path.Combine(dir, "config.json"));
+                    this.Monitor.Log($"Reading content pack: {manifest.Name} {manifest.Version}");
+                    
+                    WhenDictionary configChoices = null;
+                    try
+                    {
+                        configChoices = this.Helper.ReadJsonFile<WhenDictionary>(Path.Combine(dir, "config.json"));
+                    }
+                    catch (Exception e)
+                    {
+                        this.Monitor.Log($"Failed to read config.json for {manifest.Name} {manifest.Version}");
+                        continue;
+                    }
+                        
                     if (configChoices == null) configChoices = new WhenDictionary();
 
-                    ContentConfig contentConfig = this.Helper.ReadJsonFile<ContentConfig>(Path.Combine(dir, "content.json"));
+                    ContentConfig contentConfig = null;
+
+                    try
+                    {
+                        contentConfig = this.Helper.ReadJsonFile<ContentConfig>(Path.Combine(dir, "content.json"));
+                    }
+                    catch (Exception e)
+                    {
+                        this.Monitor.Log($"Failed to read content.json for {manifest.Name} {manifest.Version}");
+                        continue;
+                    }
+
                     if (contentConfig == null) continue;
 
                     string contentPath = Path.Combine(help.DirectoryPath, this.Config.ContentPacksPath, manifest.UniqueID);
@@ -113,19 +145,28 @@ namespace HDSprites
 
         public void Edit<T>(IAssetData assetData)
         {
-            string assetName = assetData.AssetName.Replace("/", $"\\");
-
             AssetTexture assetTexture;
+            string assetName = assetData.AssetName.Replace("/", $"\\");
+            
             if (!AssetTextures.ContainsKey(assetName))
             {
                 Texture2D texture = this.HDAssetManager.LoadAsset(assetName);
+
                 assetTexture = new AssetTexture(assetName, assetData.AsImage().Data, texture, this.Config.AssetScale, WhiteBoxFixAssets.Contains(assetName));
                 AssetTextures.Add(assetName, assetTexture);
             }
             else
             {
                 assetTexture = AssetTextures.GetValueSafe(assetName);
-                assetTexture.setOriginalTexture(assetData.AsImage().Data);
+
+                if (assetData.AsImage().Data.Bounds.Equals(assetTexture.Bounds))
+                {
+                    assetTexture.SetOriginalTexture(assetData.AsImage().Data);
+                }
+                else
+                {
+                    AssetTextures[assetName] = assetTexture = new AssetTexture(assetName, assetData.AsImage().Data, assetTexture.HDTexture, this.Config.AssetScale, WhiteBoxFixAssets.Contains(assetName));
+                }
             }
 
             this.ContentPackManager.EditAsset(assetName);

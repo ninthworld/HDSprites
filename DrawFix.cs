@@ -41,7 +41,7 @@ namespace HDSprites
                     if (WhiteBoxData.TryGetValue(dataKey, out data))
                     {
                         texture.GetData(data);
-                        if (assetTexture.checkUniqueID(data)) texture = assetTexture;
+                        if (assetTexture.CheckUniqueID(data)) texture = assetTexture;
                     }
                 }
             }
@@ -54,8 +54,15 @@ namespace HDSprites
 
                 if (a.HDTexture == null) return false;
 
+                var t = a.HDTexture;
+                if (r.Y * a.Scale > 4096 && a.EXTexture != null)
+                {
+                    newSR = new Rectangle?(new Rectangle((int)(r.X * a.Scale), (int)(r.Y * a.Scale) - 4096, (int)(r.Width * a.Scale), (int)(r.Height * a.Scale)));
+                    t = a.EXTexture;
+                }
+
                 skip = true;
-                __instance.Draw(a.HDTexture, newDestination, newSR, color, rotation, newOrigin, effects, layerDepth);
+                __instance.Draw(t, newDestination, newSR, color, rotation, newOrigin, effects, layerDepth);
                 skip = false;
 
                 return false;
