@@ -1,7 +1,4 @@
-﻿using StardewModdingAPI;
-using StardewModdingAPI.Utilities;
-using StardewValley;
-using System.Collections.Generic;
+﻿using StardewValley;
 
 namespace HDSprites.Token.Global
 {
@@ -9,11 +6,10 @@ namespace HDSprites.Token.Global
     {
         public FarmCaveGlobalToken() : base("FarmCave") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            int value = Game1.player?.caveChoice.Value ?? Farmer.caveNothing;
-            this.GlobalValue = value == Farmer.caveMushrooms ? "Mushrooms" : value == Farmer.caveBats ? "Bats" : "None";
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };            
+            int? value = Game1.player?.caveChoice.Value;
+            return this.SetValue(value == Farmer.caveMushrooms ? "Mushrooms" : value == Farmer.caveBats ? "Bats" : "None");
         }
     }
 
@@ -21,10 +17,9 @@ namespace HDSprites.Token.Global
     {
         public FarmhouseUpgradeGlobalToken() : base("FarmhouseUpgrade") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = Game1.player?.HouseUpgradeLevel.ToString() ?? "0";
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(Game1.player?.HouseUpgradeLevel.ToString() ?? "0");
         }
     }
 
@@ -32,10 +27,9 @@ namespace HDSprites.Token.Global
     {
         public FarmNameGlobalToken() : base("FarmName") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = Game1.player?.farmName ?? "";
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(Game1.player?.farmName.Value);
         }
     }
 
@@ -43,7 +37,7 @@ namespace HDSprites.Token.Global
     {
         public FarmTypeGlobalToken() : base("FarmType") { }
 
-        public override void Update()
+        protected override bool Update()
         {
             string type = "Standard";
             switch (Game1.whichFarm)
@@ -54,8 +48,7 @@ namespace HDSprites.Token.Global
                 case 4: type = "Wilderness"; break;
                 case 100: type = "Custom"; break;
             }
-            this.GlobalValue = type;
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(type);
         }
     }
 
@@ -63,10 +56,9 @@ namespace HDSprites.Token.Global
     {
         public IsCommunityCenterCompleteGlobalToken() : base("IsCommunityCenterComplete") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = ((Game1.MasterPlayer?.mailReceived.Contains("ccIsComplete") ?? false) || (Game1.MasterPlayer?.hasCompletedCommunityCenter() ?? false)).ToString();
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(((Game1.MasterPlayer?.mailReceived.Contains("ccIsComplete") ?? false) || (Game1.MasterPlayer?.hasCompletedCommunityCenter() ?? false)).ToString());
         }
     }
 
@@ -74,10 +66,9 @@ namespace HDSprites.Token.Global
     {
         public LanguageGlobalToken() : base("Language") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = "en";
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue("en");
         }
     }
 }

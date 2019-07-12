@@ -8,10 +8,9 @@ namespace HDSprites.Token.Global
     {
         public DayGlobalToken() : base("Day") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = SDate.Now().Day.ToString();
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(SDate.Now().Day.ToString());
         }
     }
 
@@ -19,23 +18,16 @@ namespace HDSprites.Token.Global
     {
         public DayEventGlobalToken() : base("DayEvent") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = "";
             if (SaveGame.loaded?.weddingToday ?? Game1.weddingToday)
-            {
-                this.GlobalValue = "wedding";
-            }
-            else
-            {
-                IDictionary<string, string> festivalDates = HDSpritesMod.ModHelper.Content.Load<Dictionary<string, string>>("Data\\Festivals\\FestivalDates", StardewModdingAPI.ContentSource.GameContent);
-                if (festivalDates.TryGetValue($"{Game1.currentSeason}{Game1.dayOfMonth}", out string festivalName))
-                {
-                    this.GlobalValue = festivalName;
-                }
-            }
+                return this.SetValue("wedding");
 
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            IDictionary<string, string> festivalDates = HDSpritesMod.ModHelper.Content.Load<Dictionary<string, string>>("Data\\Festivals\\FestivalDates", StardewModdingAPI.ContentSource.GameContent);
+            if (festivalDates.TryGetValue($"{Game1.currentSeason}{Game1.dayOfMonth}", out string festivalName))
+                return this.SetValue(festivalName);
+
+            return false;
         }
     }
 
@@ -43,10 +35,9 @@ namespace HDSprites.Token.Global
     {
         public DayOfWeekGlobalToken() : base("DayOfWeek") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = SDate.Now().DayOfWeek.ToString();
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(SDate.Now().DayOfWeek.ToString());
         }
     }
 
@@ -54,10 +45,9 @@ namespace HDSprites.Token.Global
     {
         public DaysPlayedGlobalToken() : base("DaysPlayed") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = Game1.stats.DaysPlayed.ToString();
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(Game1.stats.DaysPlayed.ToString());
         }
     }
 
@@ -65,10 +55,9 @@ namespace HDSprites.Token.Global
     {
         public SeasonGlobalToken() : base("Season") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = SDate.Now().Season.ToString();
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(SDate.Now().Season);
         }
     }
 
@@ -76,10 +65,9 @@ namespace HDSprites.Token.Global
     {
         public YearGlobalToken() : base("Year") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = SDate.Now().Year.ToString();
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(SDate.Now().Year.ToString());
         }
     }
 
@@ -87,37 +75,17 @@ namespace HDSprites.Token.Global
     {
         public WeatherGlobalToken() : base("Weather") { }
 
-        public override void Update()
+        protected override bool Update()
         {
             if (Utility.isFestivalDay(Game1.dayOfMonth, Game1.currentSeason) || (SaveGame.loaded?.weddingToday ?? Game1.weddingToday))
-            {
-                this.GlobalValue = "Sun";
-            }
-            else if (Game1.isSnowing)
-            {
-                this.GlobalValue = "Snow";
-            }
-            else if (Game1.isRaining)
-            {
-                if (Game1.isLightning)
-                {
-                    this.GlobalValue = "Storm";
-                }
-                else
-                {
-                    this.GlobalValue = "Rain";
-                }
-            }
-            else if (SaveGame.loaded?.isDebrisWeather ?? Game1.isDebrisWeather)
-            {
-                this.GlobalValue = "Wind";
-            }
-            else
-            {
-                this.GlobalValue = "Sun";
-            }
-
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+                return this.SetValue("Sun");
+            if (Game1.isSnowing)
+                return this.SetValue("Snow");
+            if (Game1.isRaining)
+                return this.SetValue(Game1.isLightning ? "Storm" : "Rain");
+            if (SaveGame.loaded?.isDebrisWeather ?? Game1.isDebrisWeather)
+                return this.SetValue("Wind");
+            return this.SetValue("Sun");
         }
     }
 }

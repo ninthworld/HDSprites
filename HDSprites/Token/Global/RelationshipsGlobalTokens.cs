@@ -1,6 +1,4 @@
-﻿using StardewModdingAPI;
-using StardewModdingAPI.Utilities;
-using StardewValley;
+﻿using StardewValley;
 using System.Collections.Generic;
 
 namespace HDSprites.Token.Global
@@ -9,21 +7,22 @@ namespace HDSprites.Token.Global
     {
         public HeartsGlobalToken() : base("Hearts") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = "";
-            this.GlobalValues = new List<ValueExt>();
-
             Farmer player = Game1.player;
-            if (player == null) return;
-            
+            if (player == null)
+                return false;
+
+            this.GlobalValue = "";
             foreach(var entry in player.friendshipData.Pairs)
             {
-                int value = (int)(entry.Value.Points / NPC.friendshipPointsPerHeartLevel);
+                int value = entry.Value.Points / NPC.friendshipPointsPerHeartLevel;
                 List<string> values = new List<string>();
-                for (int i = 0; i <= value; ++i) values.Add(i.ToString());
+                for (int i = 0; i <= value; ++i)
+                    values.Add(i.ToString());
                 this.GlobalValues.Add(new ValueExt(entry.Key, values));
             }
+            return true;
         }
     }
 
@@ -31,18 +30,16 @@ namespace HDSprites.Token.Global
     {
         public RelationshipGlobalToken() : base("Relationship") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = "";
-            this.GlobalValues = new List<ValueExt>();
-
             Farmer player = Game1.player;
-            if (player == null) return;
+            if (player == null)
+                return false;
 
+            this.GlobalValue = "";
             foreach (var entry in player.friendshipData.Pairs)
-            {
-                this.GlobalValues.Add(new ValueExt(entry.Key, new List<string>() { entry.Value.Status.ToString() }));
-            }
+                this.GlobalValues.Add(new ValueExt(entry.Key, new List<string> { entry.Value.Status.ToString() }));
+            return true;
         }
     }
 
@@ -50,10 +47,9 @@ namespace HDSprites.Token.Global
     {
         public SpouseGlobalToken() : base("Spouse") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = Game1.player?.spouse ?? "";
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };            
+            return this.SetValue(Game1.player?.spouse);
         }
     }
 }

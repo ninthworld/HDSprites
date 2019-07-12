@@ -1,7 +1,7 @@
 ﻿using StardewModdingAPI;
-using StardewModdingAPI.Utilities;
 using StardewValley;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HDSprites.Token.Global
 {
@@ -9,28 +9,17 @@ namespace HDSprites.Token.Global
     {
         public HasFlagGlobalToken() : base("HasFlag") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = "";
-            this.GlobalValues = new List<ValueExt>();
-
             Farmer player = Game1.player;
-            if (player == null) return;
+            if (player == null)
+                return false;
 
-            foreach (var entry in player.mailReceived)
-            {
-                this.GlobalValues.Add(new ValueExt(entry, new List<string>()));
-            }
-
-            foreach (var entry in player.mailForTomorrow)
-            {
-                this.GlobalValues.Add(new ValueExt(entry, new List<string>()));
-            }
-
-            foreach (var entry in player.mailbox)
-            {
-                this.GlobalValues.Add(new ValueExt(entry, new List<string>()));
-            }
+            return this.SetValues(
+                player.mailReceived
+                .Concat(player.mailForTomorrow)
+                .Concat(player.mailbox)
+            );
         }
     }
 
@@ -38,52 +27,49 @@ namespace HDSprites.Token.Global
     {
         public HasProfessionGlobalToken() : base("HasProfession") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = "";
-            this.GlobalValues = new List<ValueExt>();
-
             Farmer player = Game1.player;
-            if (player == null) return;
+            if (player == null)
+                return false;
 
-            foreach (var id in player.professions)
+            return this.SetValues(player.professions.Select(id =>
             {
-                string name = "";
                 switch (id)
                 {
-                    case Farmer.acrobat: name = "Acrobat"; break;
-                    case Farmer.brute: name = "Brute"; break;
-                    case Farmer.defender: name = "Defender "; break;
-                    case Farmer.desperado: name = "Desperado"; break;
-                    case Farmer.fighter: name = "Fighter"; break;
-                    case Farmer.scout: name = "Scout"; break;
-                    case Farmer.agriculturist: name = "Agriculturist"; break;
-                    case Farmer.artisan: name = "Artisan"; break;
-                    case Farmer.butcher: name = "Butcher"; break;
-                    case Farmer.rancher: name = "Rancher"; break;
-                    case Farmer.shepherd: name = "Shepherd"; break;
-                    case Farmer.tiller: name = "Tiller"; break;
-                    case Farmer.angler: name = "Angler"; break;
-                    case Farmer.fisher: name = "Fisher"; break;
-                    case Farmer.baitmaster: name = "Mariner"; break;
-                    case Farmer.pirate: name = "Pirate"; break;
-                    case Farmer.mariner: name = "Luremaster "; break;
-                    case Farmer.trapper: name = "Trapper"; break;
-                    case Farmer.botanist: name = "Botanist"; break;
-                    case Farmer.forester: name = "Forester"; break;
-                    case Farmer.gatherer: name = "Gatherer"; break;
-                    case Farmer.lumberjack: name = "Lumberjack"; break;
-                    case Farmer.tapper: name = "Tapper"; break;
-                    case Farmer.tracker: name = "Tracker"; break;
-                    case Farmer.blacksmith: name = "Blacksmith"; break;
-                    case Farmer.excavator: name = "Excavator"; break;
-                    case Farmer.gemologist: name = "Gemologist"; break;
-                    case Farmer.geologist: name = "Geologist"; break;
-                    case Farmer.miner: name = "Miner"; break;
-                    case Farmer.burrower: name = "Prospector "; break;
+                    case Farmer.acrobat: return "Acrobat";
+                    case Farmer.brute: return "Brute";
+                    case Farmer.defender: return "Defender ";
+                    case Farmer.desperado: return "Desperado";
+                    case Farmer.fighter: return "Fighter";
+                    case Farmer.scout: return "Scout";
+                    case Farmer.agriculturist: return "Agriculturist";
+                    case Farmer.artisan: return "Artisan";
+                    case Farmer.butcher: return "Butcher";
+                    case Farmer.rancher: return "Rancher";
+                    case Farmer.shepherd: return "Shepherd";
+                    case Farmer.tiller: return "Tiller";
+                    case Farmer.angler: return "Angler";
+                    case Farmer.fisher: return "Fisher";
+                    case Farmer.baitmaster: return "Mariner";
+                    case Farmer.pirate: return "Pirate";
+                    case Farmer.mariner: return "Luremaster ";
+                    case Farmer.trapper: return "Trapper";
+                    case Farmer.botanist: return "Botanist";
+                    case Farmer.forester: return "Forester";
+                    case Farmer.gatherer: return "Gatherer";
+                    case Farmer.lumberjack: return "Lumberjack";
+                    case Farmer.tapper: return "Tapper";
+                    case Farmer.tracker: return "Tracker";
+                    case Farmer.blacksmith: return "Blacksmith";
+                    case Farmer.excavator: return "Excavator";
+                    case Farmer.gemologist: return "Gemologist";
+                    case Farmer.geologist: return "Geologist";
+                    case Farmer.miner: return "Miner";
+                    case Farmer.burrower: return "Prospector ";
+                    default: return "";
                 }
-                this.GlobalValues.Add(new ValueExt(name, new List<string>()));
-            }
+            }));
         }
     }
 
@@ -91,18 +77,13 @@ namespace HDSprites.Token.Global
     {
         public HasReadLetterGlobalToken() : base("HasReadLetter") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = "";
-            this.GlobalValues = new List<ValueExt>();
-
             Farmer player = Game1.player;
-            if (player == null) return;
+            if (player == null)
+                return false;
 
-            foreach (var entry in player.mailReceived)
-            {
-                this.GlobalValues.Add(new ValueExt(entry, new List<string>()));
-            }
+            return this.SetValues(player.mailReceived);
         }
     }
 
@@ -110,18 +91,13 @@ namespace HDSprites.Token.Global
     {
         public HasSeenEventGlobalToken() : base("HasSeenEvent") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = "";
-            this.GlobalValues = new List<ValueExt>();
-
             Farmer player = Game1.player;
-            if (player == null) return;
+            if (player == null)
+                return false;
 
-            foreach (var entry in player.eventsSeen)
-            {
-                this.GlobalValues.Add(new ValueExt(entry.ToString(), new List<string>()));
-            }
+            return this.SetValues(player.eventsSeen);
         }
     }
 
@@ -129,24 +105,25 @@ namespace HDSprites.Token.Global
     {
         public HasWalletItemGlobalToken() : base("HasWalletItem") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = "";
-            this.GlobalValues = new List<ValueExt>();
-
             Farmer player = Game1.player;
-            if (player == null) return;
+            if (player == null)
+                return false;
 
-            if (player.canUnderstandDwarves) this.GlobalValues.Add(new ValueExt("DwarvishTranslationGuide", new List<string>()));
-            if (player.hasRustyKey) this.GlobalValues.Add(new ValueExt("RustyKey", new List<string>()));
-            if (player.hasClubCard) this.GlobalValues.Add(new ValueExt("ClubCard", new List<string>()));
-            if (player.hasSpecialCharm) this.GlobalValues.Add(new ValueExt("SpecialCharm", new List<string>()));
-            if (player.hasSkullKey) this.GlobalValues.Add(new ValueExt("SkullKey", new List<string>()));
-            if (player.hasMagnifyingGlass) this.GlobalValues.Add(new ValueExt("MagnifyingGlass", new List<string>()));
-            if (player.hasDarkTalisman) this.GlobalValues.Add(new ValueExt("DarkTalisman", new List<string>()));
-            if (player.hasMagicInk) this.GlobalValues.Add(new ValueExt("MagicInk", new List<string>()));
-            if (player.eventsSeen.Contains(2120303)) this.GlobalValues.Add(new ValueExt("BearsKnowledge", new List<string>()));
-            if (player.eventsSeen.Contains(3910979)) this.GlobalValues.Add(new ValueExt("SpringOnionMastery", new List<string>()));
+            List<string> values = new List<string>();
+            if (player.canUnderstandDwarves) values.Add("DwarvishTranslationGuide");
+            if (player.hasRustyKey) values.Add("RustyKey");
+            if (player.hasClubCard) values.Add("ClubCard");
+            if (player.hasSpecialCharm) values.Add("SpecialCharm");
+            if (player.hasSkullKey) values.Add("SkullKey");
+            if (player.hasMagnifyingGlass) values.Add("MagnifyingGlass");
+            if (player.hasDarkTalisman) values.Add("DarkTalisman");
+            if (player.hasMagicInk) values.Add("MagicInk");
+            if (player.eventsSeen.Contains(2120303)) values.Add("BearsKnowledge");
+            if (player.eventsSeen.Contains(3910979)) values.Add("SpringOnionMastery");
+
+            return this.SetValues(values);
         }
     }
 
@@ -154,10 +131,9 @@ namespace HDSprites.Token.Global
     {
         public IsMainPlayerGlobalToken() : base("IsMainPlayer") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = Context.IsMainPlayer.ToString();
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(Context.IsMainPlayer.ToString());
         }
     }
 
@@ -165,10 +141,9 @@ namespace HDSprites.Token.Global
     {
         public IsOutdoorsGlobalToken() : base("IsOutdoors") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = Game1.currentLocation?.IsOutdoors.ToString() ?? "";
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(Game1.currentLocation?.IsOutdoors.ToString());
         }
     }
 
@@ -176,10 +151,9 @@ namespace HDSprites.Token.Global
     {
         public LocationNameGlobalToken() : base("LocationName") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = Game1.currentLocation?.Name ?? "";
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(Game1.currentLocation?.Name);
         }
     }
 
@@ -187,10 +161,9 @@ namespace HDSprites.Token.Global
     {
         public PlayerGenderGlobalToken() : base("PlayerGender") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = Game1.player.IsMale ? "Male" : "Female" ?? "";
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(Game1.player.IsMale ? "Male" : "Female");
         }
     }
 
@@ -198,10 +171,9 @@ namespace HDSprites.Token.Global
     {
         public PlayerNameGlobalToken() : base("PlayerName") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = Game1.player.Name ?? "";
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(Game1.player.Name);
         }
     }
 
@@ -209,10 +181,9 @@ namespace HDSprites.Token.Global
     {
         public PreferredPetGlobalToken() : base("PreferredPet") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = Game1.player.catPerson ? "Cat" : "Dog" ?? "";
-            this.GlobalValues = new List<ValueExt>() { new ValueExt(this.GlobalValue, new List<string>()) };
+            return this.SetValue(Game1.player.catPerson ? "Cat" : "Dog");
         }
     }
 
@@ -220,14 +191,13 @@ namespace HDSprites.Token.Global
     {
         public SkillLevelGlobalToken() : base("SkillLevel") { }
 
-        public override void Update()
+        protected override bool Update()
         {
-            this.GlobalValue = "";
-            this.GlobalValues = new List<ValueExt>();
-
             Farmer player = Game1.player;
-            if (player == null) return;
+            if (player == null)
+                return false;
 
+            this.GlobalValue = "";
             List<string> combatLevels = new List<string>();
             for (int i = 0; i <= player.CombatLevel; ++i) combatLevels.Add(i.ToString());
             this.GlobalValues.Add(new ValueExt("Combat", combatLevels));
@@ -251,6 +221,7 @@ namespace HDSprites.Token.Global
             List<string> miningLevels = new List<string>();
             for (int i = 0; i <= player.MiningLevel; ++i) miningLevels.Add(i.ToString());
             this.GlobalValues.Add(new ValueExt("Mining", miningLevels));
+            return true;
         }
     }
 }

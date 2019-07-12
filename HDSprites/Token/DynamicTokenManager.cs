@@ -82,10 +82,8 @@ namespace HDSprites.Token
 
             foreach (var entry in this.DynamicTokens)
             {
-                if (entry.Value is GlobalToken)
-                {
-                    ((GlobalToken)entry.Value).Update();
-                }
+                if (entry.Value is GlobalToken token)
+                    token.UpdateToken();
             }
 
             List<ContentPackAsset> updateAsset = new List<ContentPackAsset>();
