@@ -23,11 +23,10 @@ using System.Reflection;
 using System.Collections.Generic;
 using HDSprites.ContentPack;
 using System;
-using HDSprites.Token;
-using Microsoft.Xna.Framework;
 
 namespace HDSprites
 {
+    /// <summary>The mod entry class.</summary>
     public class HDSpritesMod : Mod, IAssetEditor
     {
         public static IMonitor Logger;
@@ -36,7 +35,7 @@ namespace HDSprites
         public static IModHelper ModHelper;
         public static bool EnableMod = true;
         public static Dictionary<string, AssetTexture> AssetTextures = new Dictionary<string, AssetTexture>();
-        
+
         public static List<string> WhiteBoxFixAssets = new List<string>()
         {
             "TileSheets\\tools"
@@ -46,6 +45,8 @@ namespace HDSprites
         private HDAssetManager HDAssetManager;
         private ContentPackManager ContentPackManager;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="help">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper help)
         {
             this.Config = this.Helper.ReadConfig<ModConfig>();
@@ -54,20 +55,21 @@ namespace HDSprites
             EnabledAssets = new Dictionary<string, bool>();
             ModHelper = help;
             EnableMod = this.Config.EnableMod;
-            
+
             this.HDAssetManager = new HDAssetManager(help);
             this.ContentPackManager = new ContentPackManager(this.HDAssetManager);
-            
-            this.Helper.Events.Input.ButtonPressed += OnButtonPressed;
-            this.Helper.Events.Player.Warped += OnWarped;
-            this.Helper.Events.GameLoop.DayStarted += OnDayStarted;
+
+            help.Events.Input.ButtonPressed += OnButtonPressed;
+            help.Events.Player.Warped += OnWarped;
+            help.Events.GameLoop.DayStarted += OnDayStarted;
 
             foreach (var asset in this.Config.LoadAssets)
             {
                 string loadSection = asset.Key.Substring(0, asset.Key.LastIndexOf("/"));
                 bool enabled = asset.Value && this.Config.LoadSections.GetValueSafe(loadSection);
                 AddEnabledAsset(asset.Key, enabled);
-                if (enabled) { 
+                if (enabled)
+                {
                     string assetFile = Path.Combine(this.Config.AssetsPath, asset.Key) + ".png";
                     if (File.Exists(Path.Combine(help.DirectoryPath, assetFile)))
                     {
@@ -75,7 +77,7 @@ namespace HDSprites
                     }
                 }
             }
-            
+
             string[] contentPackDirs = Directory.GetDirectories(Path.Combine(help.DirectoryPath, ".."));
             foreach (string dir in contentPackDirs)
             {
@@ -85,9 +87,9 @@ namespace HDSprites
                 ContentPackManifest manifest = null;
                 try
                 {
-                    manifest = this.Helper.ReadJsonFile<ContentPackManifest>(manifestFile);
+                    manifest = help.Data.ReadJsonFile<ContentPackManifest>(manifestFile);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     continue;
                 }
@@ -95,27 +97,27 @@ namespace HDSprites
                 if (manifest != null && this.Config.LoadContentPacks.TryGetValue(manifest.UniqueID, out bool load) && load)
                 {
                     this.Monitor.Log($"Reading content pack: {manifest.Name} {manifest.Version}");
-                    
+
                     WhenDictionary configChoices = null;
                     try
                     {
-                        configChoices = this.Helper.ReadJsonFile<WhenDictionary>(Path.Combine(dir, "config.json"));
+                        configChoices = help.Data.ReadJsonFile<WhenDictionary>(Path.Combine(dir, "config.json"));
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         this.Monitor.Log($"Failed to read config.json for {manifest.Name} {manifest.Version}");
                         continue;
                     }
-                        
+
                     if (configChoices == null) configChoices = new WhenDictionary();
 
                     ContentConfig contentConfig = null;
 
                     try
                     {
-                        contentConfig = this.Helper.ReadJsonFile<ContentConfig>(Path.Combine(dir, "content.json"));
+                        contentConfig = help.Data.ReadJsonFile<ContentConfig>(Path.Combine(dir, "content.json"));
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         this.Monitor.Log($"Failed to read content.json for {manifest.Name} {manifest.Version}");
                         continue;
@@ -136,18 +138,22 @@ namespace HDSprites
             instance.PatchAll(Assembly.GetExecutingAssembly());
         }
 
+        /// <summary>Get whether this instance can edit the given asset.</summary>
+        /// <param name="assetInfo">Basic metadata about the asset being loaded.</param>
         public bool CanEdit<T>(IAssetInfo assetInfo)
         {
             string assetName = assetInfo.AssetName.Replace("/", $"\\");
-            if (this.ContentPackManager != null) this.ContentPackManager.UpdateAssetEditable(assetName);
+            ContentPackManager?.UpdateAssetEditable(assetName);
             return IsAssetEnabled(assetName);
         }
 
+        /// <summary>Edit a matched asset.</summary>
+        /// <param name="assetData">A helper which encapsulates metadata about an asset and enables changes to it.</param>
         public void Edit<T>(IAssetData assetData)
         {
             AssetTexture assetTexture;
             string assetName = assetData.AssetName.Replace("/", $"\\");
-            
+
             if (!AssetTextures.ContainsKey(assetName))
             {
                 Texture2D texture = this.HDAssetManager.LoadAsset(assetName);
@@ -175,10 +181,13 @@ namespace HDSprites
 
             assetData.AsImage().ReplaceWith(assetTexture);
         }
-        
-        private void OnButtonPressed(object s, ButtonPressedEventArgs e)
+
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (e.Button.Equals(this.Config.ToggleEnableButton))
+            if (e.Button == this.Config.ToggleEnableButton)
             {
                 EnableMod = !EnableMod;
                 this.Config.EnableMod = EnableMod;
@@ -186,12 +195,18 @@ namespace HDSprites
             }
         }
 
-        private void OnDayStarted(object s, DayStartedEventArgs e)
+        /// <summary>Raised after the game begins a new day (including when the player loads a save).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
             this.ContentPackManager.DynamicTokenManager.CheckTokens();
         }
 
-        private void OnWarped(object s, WarpedEventArgs e)
+        /// <summary>Raised after a player warps to a new location. NOTE: this event is currently only raised for the current player.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnWarped(object sender, WarpedEventArgs e)
         {
             this.ContentPackManager.DynamicTokenManager.CheckTokens();
         }
