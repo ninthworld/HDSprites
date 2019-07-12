@@ -1,9 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29020.237
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HDSprites", "HDSprites.csproj", "{C761E5DA-4AE4-4AE7-A103-BC9CFA31246B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HDSprites", "HDSprites\HDSprites.csproj", "{C761E5DA-4AE4-4AE7-A103-BC9CFA31246B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{5954F6AD-8B7C-477F-ADB0-F1735095EC8E}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
