@@ -59,6 +59,7 @@ namespace HDSprites
             this.HDAssetManager = new HDAssetManager(help);
             this.ContentPackManager = new ContentPackManager(this.HDAssetManager);
 
+            help.Events.GameLoop.GameLaunched += OnGameLaunched;
             help.Events.Input.ButtonPressed += OnButtonPressed;
             help.Events.Player.Warped += OnWarped;
             help.Events.GameLoop.DayStarted += OnDayStarted;
@@ -136,6 +137,14 @@ namespace HDSprites
             HarmonyInstance instance = HarmonyInstance.Create("NinthWorld.HDSprites");
             DrawFix.InitializePatch(instance);
             instance.PatchAll(Assembly.GetExecutingAssembly());
+        }
+
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            this.ContentPackManager.DynamicTokenManager.CheckTokens();
         }
 
         /// <summary>Get whether this instance can edit the given asset.</summary>

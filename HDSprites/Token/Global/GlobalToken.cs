@@ -12,7 +12,6 @@ namespace HDSprites.Token.Global
         {
             this.GlobalValue = "";
             this.GlobalValues = new List<ValueExt>();
-            this.UpdateToken();
         }
         
         public override string GetValue()
