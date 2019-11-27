@@ -7,7 +7,6 @@ namespace HDSprites
     {
         public bool EnableMod { get; set; }
         public SButton ToggleEnableButton { get; set; }
-        public int AssetScale { get; set; }
         public string AssetsPath { get; set; }
         public string ContentPacksPath { get; set; }
 
@@ -19,7 +18,6 @@ namespace HDSprites
         {
             this.EnableMod = true;
             this.ToggleEnableButton = SButton.F10;
-            this.AssetScale = 2;
             this.AssetsPath = "assets";
             this.ContentPacksPath = "contentPacks";
 

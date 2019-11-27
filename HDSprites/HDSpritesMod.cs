@@ -48,7 +48,7 @@ namespace HDSprites
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="help">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper help)
-        {
+        {            
             this.Config = this.Helper.ReadConfig<ModConfig>();
 
             Logger = this.Monitor;
@@ -80,8 +80,15 @@ namespace HDSprites
             }
 
             string[] contentPackDirs = Directory.GetDirectories(Path.Combine(help.DirectoryPath, ".."));
-            foreach (string dir in contentPackDirs)
+
+            foreach (string absDir in contentPackDirs)
             {
+                this.Monitor.Log($"Abs Dir: {absDir}", LogLevel.Info);
+
+                string dir = absDir.Substring(absDir.LastIndexOf(".."));
+
+                this.Monitor.Log($"Rel Dir: {dir}", LogLevel.Info);
+
                 string manifestFile = Path.Combine(dir, "manifest.json");
                 if (Directory.GetParent(manifestFile).Name.StartsWith(".")) continue;
 
@@ -90,14 +97,15 @@ namespace HDSprites
                 {
                     manifest = help.Data.ReadJsonFile<ContentPackManifest>(manifestFile);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    this.Monitor.Log($"Error: {e.ToString()}", LogLevel.Info);
                     continue;
                 }
 
                 if (manifest != null && this.Config.LoadContentPacks.TryGetValue(manifest.UniqueID, out bool load) && load)
                 {
-                    this.Monitor.Log($"Reading content pack: {manifest.Name} {manifest.Version}");
+                    this.Monitor.Log($"Reading content pack: {manifest.Name} {manifest.Version}", LogLevel.Info);
 
                     WhenDictionary configChoices = null;
                     try
@@ -167,7 +175,7 @@ namespace HDSprites
             {
                 Texture2D texture = this.HDAssetManager.LoadAsset(assetName);
 
-                assetTexture = new AssetTexture(assetName, assetData.AsImage().Data, texture, this.Config.AssetScale, WhiteBoxFixAssets.Contains(assetName));
+                assetTexture = new AssetTexture(assetName, assetData.AsImage().Data, texture, 2, WhiteBoxFixAssets.Contains(assetName));
                 AssetTextures.Add(assetName, assetTexture);
             }
             else
@@ -180,7 +188,7 @@ namespace HDSprites
                 }
                 else
                 {
-                    AssetTextures[assetName] = assetTexture = new AssetTexture(assetName, assetData.AsImage().Data, assetTexture.HDTexture, this.Config.AssetScale, WhiteBoxFixAssets.Contains(assetName));
+                    AssetTextures[assetName] = assetTexture = new AssetTexture(assetName, assetData.AsImage().Data, assetTexture.HDTexture, 2, WhiteBoxFixAssets.Contains(assetName));
                 }
             }
 
