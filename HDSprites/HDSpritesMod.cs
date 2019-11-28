@@ -23,6 +23,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using HDSprites.ContentPack;
 using System;
+using Newtonsoft.Json;
 
 namespace HDSprites
 {
@@ -38,7 +39,11 @@ namespace HDSprites
 
         public static List<string> WhiteBoxFixAssets = new List<string>()
         {
-            "TileSheets\\tools"
+            "TileSheets\\tools",
+            "Characters\\Farmer\\farmer_base",
+            "Characters\\Farmer\\farmer_base_bald",
+            "Characters\\Farmer\\farmer_girl_base",
+            "Characters\\Farmer\\farmer_girl_base_bald",
         };
 
         private ModConfig Config;
@@ -81,36 +86,30 @@ namespace HDSprites
 
             string[] contentPackDirs = Directory.GetDirectories(Path.Combine(help.DirectoryPath, ".."));
 
-            foreach (string absDir in contentPackDirs)
+            foreach (string dir in contentPackDirs)
             {
-                this.Monitor.Log($"Abs Dir: {absDir}", LogLevel.Info);
-
-                string dir = absDir.Substring(absDir.LastIndexOf(".."));
-
-                this.Monitor.Log($"Rel Dir: {dir}", LogLevel.Info);
-
                 string manifestFile = Path.Combine(dir, "manifest.json");
                 if (Directory.GetParent(manifestFile).Name.StartsWith(".")) continue;
 
                 ContentPackManifest manifest = null;
                 try
                 {
-                    manifest = help.Data.ReadJsonFile<ContentPackManifest>(manifestFile);
+                    manifest = ReadExternalJson<ContentPackManifest>(manifestFile);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    this.Monitor.Log($"Error: {e.ToString()}", LogLevel.Info);
+                    this.Monitor.Log($"Failed to read manifest.json from {dir}");
                     continue;
                 }
 
                 if (manifest != null && this.Config.LoadContentPacks.TryGetValue(manifest.UniqueID, out bool load) && load)
                 {
-                    this.Monitor.Log($"Reading content pack: {manifest.Name} {manifest.Version}", LogLevel.Info);
+                    this.Monitor.Log($"Reading content pack: {manifest.Name} {manifest.Version}");
 
                     WhenDictionary configChoices = null;
                     try
                     {
-                        configChoices = help.Data.ReadJsonFile<WhenDictionary>(Path.Combine(dir, "config.json"));
+                        configChoices = ReadExternalJson<WhenDictionary>(Path.Combine(dir, "config.json"));
                     }
                     catch (Exception)
                     {
@@ -124,7 +123,7 @@ namespace HDSprites
 
                     try
                     {
-                        contentConfig = help.Data.ReadJsonFile<ContentConfig>(Path.Combine(dir, "content.json"));
+                        contentConfig = ReadExternalJson<ContentConfig>(Path.Combine(dir, "content.json"));
                     }
                     catch (Exception)
                     {
@@ -240,6 +239,12 @@ namespace HDSprites
         public static bool IsAssetEnabled(string assetName)
         {
             return EnabledAssets.TryGetValue(assetName, out bool enabled) && enabled;
+        }
+
+        public static T ReadExternalJson<T>(string file)
+        {
+            string json = System.IO.File.ReadAllText(file);
+            return JsonConvert.DeserializeObject<T>(json);
         }
     }
 }

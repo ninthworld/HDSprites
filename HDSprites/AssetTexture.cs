@@ -42,13 +42,14 @@ namespace HDSprites
                 int upperHeight = this.Height - lowerHeight;
 
                 Texture2D lowerTexture = new Texture2D(this.GraphicsDevice, this.Width, lowerHeight);
-                lowerTexture.SetData(0, lowerTexture.Bounds, data, 0, lowerTexture.Width * lowerTexture.Height);                
+                lowerTexture.SetData(0, lowerTexture.Bounds, data, 0, lowerTexture.Width * lowerTexture.Height);
 
                 Texture2D upperTexture = new Texture2D(this.GraphicsDevice, this.Width, upperHeight);
                 upperTexture.SetData(0, upperTexture.Bounds, data, upperTexture.Width * lowerHeight, upperTexture.Width * upperTexture.Height);
 
-                this.HDTexture = Upscaler.Upscale(lowerTexture);
-                this.EXTexture = Upscaler.Upscale(upperTexture);
+                bool cursorsFlag = this.AssetName.Equals("LooseSprites\\Cursors");
+                this.HDTexture = Upscaler.Upscale(lowerTexture, cursorsFlag);
+                this.EXTexture = Upscaler.Upscale(upperTexture, cursorsFlag);
             }
         }
 

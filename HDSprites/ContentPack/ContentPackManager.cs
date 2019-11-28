@@ -233,7 +233,7 @@ namespace HDSprites.ContentPack
                     Directory.CreateDirectory(contentFile.Substring(0, contentFile.Replace("/", "\\").LastIndexOf("\\")));
 
                     FileStream outStream = new FileStream(contentFile, FileMode.Create);
-                    texture.SaveAsPng(outStream, texture.Width, texture.Height);                    
+                    texture.SaveAsPng(outStream, texture.Width, texture.Height);
                 }
 
                 this.ContentPackTextures.Add(file, texture);

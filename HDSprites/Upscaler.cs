@@ -66,7 +66,36 @@ namespace HDSprites
             return new Color(r, g, b, a);
         }
 
-        public static Texture2D Upscale(Texture2D input)
+        public static Texture2D NearestNeighbor(Texture2D input)
+        {
+            int srcW = input.Width;
+            int srcH = input.Height;
+            Color[] srcColors = new Color[srcW * srcH];
+            input.GetData(srcColors);
+
+            int scaledW = srcW * SCALE;
+            int scaledH = srcH * SCALE;
+            Color[] scaledColors = new Color[scaledW * scaledH];
+
+            for (int x = 0; x < srcW; ++x)
+            {
+                for (int y = 0; y < srcH; ++y)
+                {
+                    Color c = srcColors[srcW * y + x];
+                    scaledColors[scaledW * (y * SCALE + 0) + (x * SCALE + 0)] = c;
+                    scaledColors[scaledW * (y * SCALE + 0) + (x * SCALE + 1)] = c;
+                    scaledColors[scaledW * (y * SCALE + 1) + (x * SCALE + 0)] = c;
+                    scaledColors[scaledW * (y * SCALE + 1) + (x * SCALE + 1)] = c;
+                }
+            }
+
+           Texture2D output = new Texture2D(input.GraphicsDevice, scaledW, scaledH);
+            output.SetData(scaledColors);
+
+            return output;
+        }
+
+        public static Texture2D Upscale(Texture2D input, bool cursorsFlag = false)
         {
             int srcW = input.Width;
             int srcH = input.Height;
@@ -100,6 +129,16 @@ namespace HDSprites
             {
                 for (int y = 0; y < srcH; ++y)
                 {
+                    if (cursorsFlag && x >= 702 && y >= 1912 && x < 704 && y < 2176)
+                    {
+                        Color c = GetColor(x, y);
+                        scaledColors[scaledW * (y * SCALE + 0) + (x * SCALE + 0)] = c;
+                        scaledColors[scaledW * (y * SCALE + 0) + (x * SCALE + 1)] = c;
+                        scaledColors[scaledW * (y * SCALE + 1) + (x * SCALE + 0)] = c;
+                        scaledColors[scaledW * (y * SCALE + 1) + (x * SCALE + 1)] = c;
+                        continue;
+                    }
+
                     /* Matrix: 10 is (0,0) i.e. current pixel.
                         -2 | -1|  0| +1| +2 	(x)
                     ______________________________
@@ -220,8 +259,9 @@ namespace HDSprites
                 }
             }
 
-            Texture2D output = new Texture2D(input.GraphicsDevice, scaledW, scaledH);
-            output.SetData(scaledColors);
+            int fixedH = (scaledH > 4096 ? 4096 : scaledH);
+            Texture2D output = new Texture2D(input.GraphicsDevice, scaledW, fixedH);
+            output.SetData(scaledColors, 0, scaledW * fixedH);
 
             return output;
         }
