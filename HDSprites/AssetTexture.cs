@@ -51,6 +51,13 @@ namespace HDSprites
                 this.HDTexture = Upscaler.Upscale(lowerTexture, cursorsFlag);
                 this.EXTexture = Upscaler.Upscale(upperTexture, cursorsFlag);
             }
+            else if (hdTexture != null && this.Height * this.Scale > hdTexture.Height)
+            {
+                Texture2D lowerTexture = new Texture2D(this.GraphicsDevice, this.Width, this.Height);
+                lowerTexture.SetData(0, lowerTexture.Bounds, data, 0, lowerTexture.Width * lowerTexture.Height);
+
+                this.HDTexture = Upscaler.Upscale(lowerTexture, false);
+            }
         }
 
         public void SetOriginalTexture(Texture2D texture)
